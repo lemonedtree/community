@@ -1,6 +1,8 @@
 package com.community.service;
 
+import com.community.dao.LoginTicketMapper;
 import com.community.dao.UserMapper;
+import com.community.entity.LoginTicket;
 import com.community.entity.User;
 import com.community.util.CommunityConstant;
 import com.community.util.CommunityUtil;
@@ -102,4 +104,89 @@ public class UserService implements CommunityConstant {
             return ACTICATION_FAILURE;
         }
     }
+
+    @Autowired
+    LoginTicketMapper loginTicketMapper;
+
+    public Map<String, Object> login(String username, String password, long expiredSeconds) {
+        Map<String, Object> map = new HashMap<>();
+        if(StringUtils.isBlank(username)) {
+            map.put("usernameMsg", "账号不能为空");
+            return map;
+        }
+        if(StringUtils.isBlank(password)) {
+            map.put("passwordMsg", "密码不能为空");
+            return map;
+        }
+        User user = userMapper.selectByName(username);
+        if(user == null) {
+            map.put("usernameMsg", "该账号不存在");
+            return map;
+        }
+        if(user.getStatus() == 0) {
+            map.put("usernameMsg", "该账号未激活");
+            return map;
+        }
+        password = CommunityUtil.md5(password + user.getSalt());
+        if (!user.getPassword().equals(password)) {
+            map.put("passwordMsg", "密码不正确");
+            return map;
+        }
+
+        //终于要生成登录凭证了
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSeconds * 1000));
+        loginTicket.setTicket(CommunityUtil.generateUUID());
+        loginTicketMapper.insertLoginTicket(loginTicket);
+        map.put("ticket", loginTicket.getTicket());
+        return map;
+    }
+
+    public void logout(String ticket) {
+        loginTicketMapper.updateStatus(ticket, 1);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

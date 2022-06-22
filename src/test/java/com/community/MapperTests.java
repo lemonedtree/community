@@ -1,8 +1,10 @@
 package com.community;
 
 import com.community.dao.DiscussPostMapper;
+import com.community.dao.LoginTicketMapper;
 import com.community.dao.UserMapper;
 import com.community.entity.DiscussPost;
+import com.community.entity.LoginTicket;
 import com.community.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,6 +86,26 @@ public class MapperTests {
         }
     }
 
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
+
+    @Test
+    public void testLoginTicketMapper1() {
+        LoginTicket loginTicket = new LoginTicket();
+
+        loginTicket.setTicket("abc");
+        loginTicket.setUserId(101);
+        loginTicket.setStatus(0);
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + 1000 * 60 * 10));
+
+        loginTicketMapper.insertLoginTicket(loginTicket);
+    }
+
+    @Test
+    public void testLoginTicketMapper2() {
+        System.out.println(loginTicketMapper.selectByTicket("abc").getTicket());
+        loginTicketMapper.updateStatus("abc",1);
+    }
 }
 
 
