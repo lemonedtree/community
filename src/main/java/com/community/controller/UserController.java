@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.util.Map;
 
 /**
  * @author XD
@@ -106,6 +107,19 @@ public class UserController {
         }
     }
 
+    @RequestMapping(path = "updatepassword", method = RequestMethod.POST)
+    public String changePassword(String oldPassword, String newPassword, String assertPassword, Model model) {
+        User user = hostHolder.getUser();
+        Map<String, Object> map = userService.changePassword(user, oldPassword, newPassword, assertPassword);
+        if (map == null || map.isEmpty()) {
+            return "redirect:/index";
+        }
+        model.addAttribute("oldPasswordMsg", map.get("oldPasswordMsg"));
+        model.addAttribute("newPasswordMsg", map.get("newPasswordMsg"));
+        model.addAttribute("assertPasswordMsg", map.get("assertPasswordMsg"));
+        //密码改成功了，但是返回不了这个
+        return "/site/setting";
+    }
 }
 
 
