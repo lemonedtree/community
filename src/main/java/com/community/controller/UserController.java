@@ -1,5 +1,6 @@
 package com.community.controller;
 
+import com.community.annotation.LoginRequired;
 import com.community.entity.User;
 import com.community.service.UserService;
 import com.community.util.CommunityUtil;
@@ -45,11 +46,13 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+    @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage() {
         return "/site/setting";
     }
 
+    @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
         if (headerImage == null) {
@@ -107,6 +110,7 @@ public class UserController {
         }
     }
 
+    @LoginRequired
     @RequestMapping(path = "updatepassword", method = RequestMethod.POST)
     public String changePassword(String oldPassword, String newPassword, String assertPassword, Model model) {
         User user = hostHolder.getUser();
