@@ -29,7 +29,6 @@ public class MapperTests {
 
     @Autowired
     DiscussPostMapper discussPostMapper;
-
     @Test
     public void testSelectUser() {
         User user = userMapper.selectById(101);

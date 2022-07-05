@@ -19,7 +19,7 @@ import java.util.Date;
  * @author XD
  * @create 2022-06-23 14:13
  */
-@Controller
+@Component
 public class LoginTicketInterceptor implements HandlerInterceptor {
     @Autowired
     UserService userService;
@@ -29,6 +29,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        //把user装进hostHolder
         String ticket = CookieUtil.getValue(request, "ticket");
         if (ticket != null) {
             LoginTicket loginTicket = userService.findLoginTicket(ticket);
@@ -44,6 +45,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        //把hostHolder装进页面，名字叫做loginUser
         User user = hostHolder.getUser();
         if (user != null && modelAndView != null) {
             modelAndView.addObject("loginUser", user);
@@ -52,6 +54,7 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        //清楚hostholder免得不断堆积
         hostHolder.clear();
     }
 }
