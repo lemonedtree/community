@@ -10,6 +10,7 @@ public class Page {
     private int limit = 10;
     //数据总数
     private int rows;
+    //我只想知道这个path到底有什么用
     private String path;
 
     public int getLimit() {
