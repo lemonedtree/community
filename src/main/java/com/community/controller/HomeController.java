@@ -4,7 +4,9 @@ import com.community.entity.DiscussPost;
 import com.community.entity.Page;
 import com.community.entity.User;
 import com.community.service.DiscussPostService;
+import com.community.service.LikeService;
 import com.community.service.UserService;
+import com.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,27 +23,36 @@ import java.util.Map;
  * @create 2022-05-18 16:02
  */
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
     @Autowired
     DiscussPostService discussPostService;
     @Autowired
     UserService userService;
+    @Autowired
+    LikeService likeService;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page) {
+        // 方法调用前,SpringMVC会自动实例化Model和Page,并将Page注入Model.
+        // 所以,在thymeleaf中可以直接访问Page对象中的数据.
         page.setRows(discussPostService.findDiscussPostRows(0));
         page.setPath("/index");
-        //要显示一页，这一页需要 post的信息，user的信息
+
         List<DiscussPost> list = discussPostService.findDiscussPosts(0, page.getOffset(), page.getLimit());
-        //map里面装上 user  post
         List<Map<String, Object>> discussPosts = new ArrayList<>();
-        for (DiscussPost discussPost : list) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("post", discussPost);
-            int userId = discussPost.getUserId();
-            User user = userService.findUserById(userId);
-            map.put("user", user);
-            discussPosts.add(map);
+        if (list != null) {
+            for (DiscussPost post : list) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("post", post);
+                User user = userService.findUserById(post.getUserId());
+                map.put("user", user);
+
+                //我们需要一个帖子得到赞的总数
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
+
+                discussPosts.add(map);
+            }
         }
         model.addAttribute("discussPosts", discussPosts);
         return "/index";
