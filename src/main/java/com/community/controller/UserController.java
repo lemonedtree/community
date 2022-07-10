@@ -2,6 +2,7 @@ package com.community.controller;
 
 import com.community.annotation.LoginRequired;
 import com.community.entity.User;
+import com.community.service.LikeService;
 import com.community.service.UserService;
 import com.community.util.CommunityUtil;
 import com.community.util.HostHolder;
@@ -45,6 +46,9 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
 
     @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
@@ -123,6 +127,18 @@ public class UserController {
         model.addAttribute("assertPasswordMsg", map.get("assertPasswordMsg"));
         //密码改成功了，但是返回不了这个
         return "/site/setting";
+    }
+//    看自己或者别人的主页
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId")int userId, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在！");
+        }
+        model.addAttribute("user",user);
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+        return "/site/profile";
     }
 }
 

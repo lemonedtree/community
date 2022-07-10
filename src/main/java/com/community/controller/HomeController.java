@@ -5,8 +5,10 @@ import com.community.entity.Page;
 import com.community.entity.User;
 import com.community.service.DiscussPostService;
 import com.community.service.LikeService;
+import com.community.service.MessageService;
 import com.community.service.UserService;
 import com.community.util.CommunityConstant;
+import com.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +32,10 @@ public class HomeController implements CommunityConstant {
     UserService userService;
     @Autowired
     LikeService likeService;
+    @Autowired
+    MessageService messageService;
+    @Autowired
+    HostHolder hostHolder;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page) {
@@ -46,7 +52,6 @@ public class HomeController implements CommunityConstant {
                 map.put("post", post);
                 User user = userService.findUserById(post.getUserId());
                 map.put("user", user);
-
                 //我们需要一个帖子得到赞的总数
                 long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
                 map.put("likeCount", likeCount);
@@ -55,6 +60,11 @@ public class HomeController implements CommunityConstant {
             }
         }
         model.addAttribute("discussPosts", discussPosts);
+        //我需要我总共有多少条未读消息
+        User user = hostHolder.getUser();
+        int unreadMessageCount = messageService.findLetterUnreadCount(user.getId(), null);
+        model.addAttribute("unreadMessageCount", unreadMessageCount);
+
         return "/index";
     }
 
